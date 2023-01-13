@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.repository_owner == krshoss
+    name: Release Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      - run: yarn release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_AUTHOR_NAME: Krish Gupta
+          GIT_AUTHOR_EMAIL: krshg@outlook.com
+          GIT_COMMITTER_NAME: Krish Gupta
+          GIT_COMMITTER_EMAIL: krshg@outlook.com
