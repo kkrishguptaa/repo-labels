@@ -1,0 +1,292 @@
+api-version: reviewpad.com/v3.x
+
+labels:
+  priority-critical:
+    name: "🟥 priority: critical"
+    description: "Must be fixed ASAP"
+    color: "#b60205"
+  priority-high:
+    name: "🟧 priority: high"
+    description: "Stalls work on the project or its dependents"
+    color: "#ff9f1c"
+  priority-medium:
+    name: "🟨 priority: medium"
+    description: "Not blocking but should be fixed soon"
+    color: "#ffcc00"
+  priority-low:
+    name: "🟩 priority: low"
+    description: "Low priority and doesn't need to be rushed"
+    color: "#cfda2c"
+  priority-none:
+    name: "🟪 priority: none"
+    description: "No priority, should only be performed when a developer is available"
+    color: "#008672"
+  status-ready-for-review:
+    name: "🏁 status: ready for dev"
+    description: "Ready for work"
+    color: "#cccccc"
+  status-blocked:
+    name: "🚧 status: blocked"
+    description: "Blocked and therefore not ready for work"
+    color: "#999999"
+  status-ticket-work-required:
+    name: "🧹 status: ticket work required"
+    description: "Needs more details before it can be worked on"
+    color: "#666666"
+  status-label-work-required:
+    name: "🏷 status: label work required"
+    description: "Needs proper labelling before it can be worked on"
+    color: "#666666"
+  status-discarded:
+    name: "⛔️ status: discarded"
+    description: "Will not be worked on"
+    color: "#eeeeee"
+  status-awaiting-triage:
+    name: "🚦 status: awaiting triage"
+    description: "Has not been triaged & therefore, not ready for work"
+    color: "#333333"
+  goal-feat:
+    name: "⭐ goal: addition"
+    description: "Addition/Improvement of feature"
+    color: "#ffffff"
+  goal-fix:
+    name: "🛠 goal: fix"
+    description: "Bug fix"
+    color: "#ffffff"
+  aspect-text:
+    name: "📝 aspect: text"
+    description: "Concerns the documentation material in the repository"
+    color: "#04338c"
+  aspect-code:
+    name: "💻 aspect: code"
+    description: "Concerns the software code in the repository"
+    color: "#04338c"
+  pull-ready-for-review:
+    name: "🔍 pull: ready for review"
+    description: "PR is ready for maintainer review."
+    color: "#33dd33"
+  pull-merge-conflict:
+    name: "⚠️ pull: merge conflict"
+    description: "PR has conflicts and requires a rebase."
+    color: "#dddd33"
+  pull-requires-update:
+    name: "⏫ pull: requires update"
+    description: "PR has requested changes that still need to be applied."
+    color: "#dd3333"
+  pull-work-in-progress:
+    name: "⚒️ pull: work in progress"
+    description: "PR is still being worked on and is not ready for review."
+    color: "#dddd33"
+  pull-accepted:
+    name: "✅ pull: accepted"
+    description: "PR has been merged. Thank you for your contribution!"
+    color: "#ffffff"
+  pull-rejected:
+    name: "❌ pull: rejected"
+    description: "PR has been closed. We would welcome future contributions!"
+    color: "#ffffff"
+  size-small:
+    name: "🟩 pull: small"
+    description: "PR is small and easy to review"
+    color: "#76dbbe"
+  size-medium:
+    name: "🟨 pull: medium"
+    description: "PR is medium sized and requires some effort to review"
+    color: "#2986cc"
+  size-large:
+    name: "🟧 pull: large"
+    description: "PR is large and requires a lot of effort to review"
+    color: "#ff9f1c"
+  first-contribution:
+    name: "🟢 first contribution"
+    description: "PR is the first contribution of the contributor"
+    color: "#7f0799"
+  good-first-issue:
+    name: "good first issue"
+    description: "New-contributor friendly"
+    color: "#7f0799"
+  good-first-eddiehub:
+    name: "EddieHub:good-first-issue"
+    description: "Good first issue for EddieHubCommunity/good-first-issue-finder"
+    color: "#7f0799"
+  help-wanted:
+    name: "help wanted"
+    description: "Open to participation from the community"
+    color: "#7f0799"
+  dependencies:
+    name: "dependencies"
+    description: "This PR changes dependencies"
+    color: "#3333dd"
+  invalid:
+    name: "invalid"
+    description: "This PR is invalid"
+    color: "#dd3333"
+  wontfix:
+    name: "wontfix"
+    description: "This Issue will not be fixed"
+    color: "#dd3333"
+  duplicate:
+    name: "duplicate"
+    description: "This Issue is a duplicate"
+    color: "#dd3333"
+  hacktoberfest:
+    name: "hacktoberfest"
+    description: "Hacktoberfest Open Issues"
+    color: "#7f0799"
+
+workflows:
+  - name: praise-contributors-on-milestones
+    always-run: true
+    if:
+      - rule: $pullRequestCountBy($author()) == 1
+        extra-actions:
+          - $commentOnce($sprintf("Thank you @%s for this first contribution!", [$author()]))
+          - $addLabel("first-contribution")
+      - rule: $pullRequestCountBy($author()) == 10
+        extra-actions:
+          - $commentOnce($sprintf("Way to go 🎉 This is your 10th pull request!", [$author()]))
+
+  - name: check-conventional-commits
+    description: Validate that pull requests follow the conventional commits
+    always-run: true
+    if:
+      - rule: $base() == "main"
+      - rule: $isDraft() == false
+    then:
+      - $commitLint()
+      - $titleLint()
+
+  - name: labelling
+    always-run: true
+    if:
+      - rule: state == "open"
+        extra-actions:
+          - $addLabel("status-awaiting-triage")
+      - rule: $hasLinkedIssues() == false
+        extra-actions:
+          - $commentOnce("Hey @%s, please link an issue to this pull request. Search for the issues already available that match this description, or create one for this PR 😀", [$author()])
+          - $addLabel("status-ticket-work-required")
+
+      - rule: $description() == ""
+        extra-actions:
+          - $commentOnce("Hey @%s, please add a description to this pull request. This helps reviewers understand the context of the PR. 😀", [$author()])
+          - $addLabel("status-ticket-work-required")
+
+      - rule: $hasLinkedIssues() == true && $description() != ""
+        extra-actions:
+          - $removeLabel("status-ticket-work-required")
+
+      - rule: $hasGitConflicts()
+        extra-actions:
+          - $commentOnce("Hey @%s, It looks like you have a git conflict, please resolve that commit before this PR can be merged, if you are not sure on how to do that, please read [github docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/about-merge-conflicts) 💖", [$author()])
+          - $addLabel("pull-merge-conflict")
+
+      - rule: $hasGitConflicts() == false
+        extra-actions:
+          - $removeLabel("pull-merge-conflict")
+
+      - rule: $hasUnaddressedThreads()
+        extra-actions:
+          - $addLabel("pull-requires-update")
+
+      - rule: $hasUnaddressedThreads() == false
+        extra-actions:
+          - $removeLabel("pull-requires-update")
+
+      - rule: $isDraft()
+        extra-actions:
+          - $commentOnce("Hey @%s, this PR is a draft, please mark it as ready for review when you are ready 😀", [$author()])
+          - $addLabel("pull-work-in-progress")
+
+      - rule: $isDraft() == false
+        extra-actions:
+          - $commentOnce("Hey @%s, this PR has been marked ready-to-review one of our maintainers will have a look soon", [$author()])
+          - $removeLabel("pull-work-in-progress")
+
+      - rule: $hasLinkedIssues() == false && $description() == "" && $hasGitConflicts() && $hasUnaddressedThreads() && $isDraft()
+        extra-actions:
+          - $addLabel("status-blocked")
+          - $removeLabel("pull-ready-for-review")
+
+      - rule: $hasLinkedIssues() && $description() != "" && $hasGitConflicts() == false && $hasUnaddressedThreads() == false && $isDraft() == false
+        extra-actions:
+          - $removeLabel("status-ticket-work-required")
+          - $removeLabel("status-blocked")
+          - $removeLabel("pull-requires-update")
+          - $removeLabel("pull-work-in-progress")
+          - $addLabel("pull-ready-for-review")
+
+      - rule: isMerged()
+        extra-actions:
+          - $addLabel("pull-accepted")
+          - $removeLabel("pull-ready-for-review")
+          - $commentOnce("Hey @%s, thank you for your contributions, this PR has been merged 🎉", [$author()])
+
+      - rule: $state() == "closed" && $isMerged() == false
+        extra-actions:
+          - $addLabel("pull-rejected")
+          - $removeLabel("pull-ready-for-review")
+
+      - rule: $size() < 100
+        extra-actions:
+          - $removeLabels(["size-medium", "size-large"])
+          - $addLabel("size-small")
+      - rule: $size() >= 100 && $size() < 300
+        extra-actions:
+          - $removeLabels(["size-small", "size-large"])
+          - $addLabel("size-medium")
+      - rule: $size() >= 300
+        extra-actions:
+          - $removeLabels(["size-small", "size-medium"])
+          - $addLabel("size-large")
+      - rule: '$any($commits(), ($c: String => $startsWith($c, "fix:")))'
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("goal-fix")
+          - $addLabel("aspect-code")
+      - rule: '$any($commits(), ($c: String => $startsWith($c, "feat:")))'
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("goal-feat")
+          - $addLabel("aspect-code")
+      - rule: '$any($commits(), ($c: String => $startsWith($c, "docs:")))'
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("aspect-text")
+      - rule: $hasFileExtensions([".md", ".mdx", ".txt", ".json", ".yml", ".yaml", ".toml"])
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("aspect-text")
+      - rule: $hasFileExtensions([".md", ".mdx", ".txt", ".json", ".yml", ".yaml", ".toml"]) == false
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("aspect-code")
+      - rule: $changed("package.json")
+        extra-actions:
+          - $removeLabel("status-label-work-required")
+          - $addLabel("dependencies")
+
+  - name: close
+    always-run: true
+    if:
+      - rule: $hasLabel("status-discarded")
+      - rule: $hasLabel("wontfix")
+      - rule: $hasLabel("invalid")
+      - rule: $hasLabel("duplicate")
+    then:
+      - $close()
+
+  - name: eddiehub-good-first-issue
+    always-run: true
+    if:
+      - rule: $hasLabel("good-first-issue")
+        extra-actions:
+          - $addLabel("good-first-eddiehub")
+
+  - name: license-validation
+    always-run: true
+    if:
+      - rule: $hasFilePattern("**/LICENSE*")
+        extra-actions:
+          - $addLabel("status-discarded")
+          - $commentOnce("Hey @%s, this PR modifies a license file. Please revert the changes to the license file and open another PR.", [$author()])

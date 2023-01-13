@@ -1,0 +1,25 @@
+{
+  "name": "@krshoss/repo-labels",
+  "version": "0.0.0",
+  "main": "labels.json",
+  "description": "Json File of Oss Labels That Should Be on All @krshoss Repositories",
+  "repository": "https://github.com/krshoss/repo-labels.git",
+  "author": "Krish Gupta <krshg@outlook.com>",
+  "scripts": {
+    "release": "semantic-release",
+    "build": "node transform.js"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.2",
+    "@semantic-release/commit-analyzer": "^9.0.2",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.7",
+    "@semantic-release/release-notes-generator": "^10.0.3",
+    "semantic-release": "^20.0.2"
+  },
+  "dependencies": {
+    "yaml-reader": "^1.0.3"
+  }
+}
