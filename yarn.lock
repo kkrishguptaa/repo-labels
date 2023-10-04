@@ -3489,9 +3489,9 @@ yallist@^4.0.0:
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
 yaml-reader@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/yaml-reader/-/yaml-reader-1.0.3.tgz#e73e6d472a341c7ede7beeb22116c245f5f27d6b"
-  integrity sha512-EteKXemMVrOVawmWtMT1podexGc9/frC4BSSR/YiTbeieJCvewx7AKUyIv7MkoDWRFnMEdE0DI4WWITlyrbOFg==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/yaml-reader/-/yaml-reader-1.0.4.tgz#fb237b4deca01079dd41b3b3636accac6de3a413"
+  integrity sha512-EfIkwe/nPAIYLgyjyR0ojo+DvSRJlLgykd0WeKEkjq5Zmtst53m91rlpkIX6aiTYEyCbt1BEzkbEfuE6psh/mA==
   dependencies:
     js-yaml "^3.13.*"
 
